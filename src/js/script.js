@@ -9,6 +9,22 @@ const templates = {
   bookTemplate: Handlebars.compile(document.querySelector('#template-book').innerHTML),
 };
 
+const select = {
+  templateOf: {
+    books: '#template-book',
+  },
+
+  listOf: {
+    booklist: '.books-list',
+  },
+
+  containerOf: {
+    image: '.book_image',
+  }
+};
+
+
+
 /*  
 1. Utworzenie i wywołanie funkcji, która przejdzie po wszystkich książkach z "dataSource.books" i wyrenderuje dla nich reprezentacje HTML w liście "".books-list". Należy wykorzystać w tym celu dostarczony w "index.html" szablon (#template-book). 
 */
@@ -29,7 +45,7 @@ function render() { // nowa funkcja render
     const generatedDOM = utils.createDOMFromHTML(generatedHTML);    //funkcja w functions.js
 
     //Wygenerowany element DOM dołącz jako nowe dziecko DOM do listy .books-list.
-    thisBookList.appendChild(generatedDOM);
+    select.listOf.booklist.appendChild(generatedDOM);
   }   
 }
 
