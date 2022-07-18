@@ -5,3 +5,5 @@ utils.createDOMFromHTML = function(htmlString) {
   div.innerHTML = htmlString.trim();
   return div.firstChild;
 };
+
+// JEST TO FUNKCJA POMOCNICZA, KTÓRA MA ZA ZADANIE GENEROWAĆ ELEMENTY DOM NA PODSTAWIE KODU HTML
