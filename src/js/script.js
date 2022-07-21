@@ -57,7 +57,7 @@ const templates = {
 
     initData(){
       const thisBookList = this;
-        
+
       thisBookList.data = dataSource.books; //ułatwienie nawigacji do danych książek
     }
 
@@ -82,8 +82,16 @@ const templates = {
       //Wewnątrz niej przejdź po każdym elemencie z dataSource.books. Pamiętaj, że plik script.js ma do tego obiektu bezpośredni dostęp.
       for(let book of dataSource.books){
 
+        // stała równa temu co zwróci determineRatingBgc dla rating danej książki
+        const ratingBgc = thisBookList.determineRatingBgc(book.rating);
+        book.ratingBgc = ratingBgc;
+
+        // stała która ustala długość paska
+        const ratingWidth = book.rating*10;
+        book.ratingWidth = ratingWidth;
+
         //Wewnątrz tej pętli zadbaj o wygenerowanie kodu HTML na podstawie szablonu oraz danych o konkretnej książce.
-        const generatedHTML = select.templateOf.books(book);
+        const generatedHTML = templates.bookTemplate(book);
 
         //Na postawie tego kodu HTML wygeneruj element DOM.
         const generatedDOM = utils.createDOMFromHTML(generatedHTML);    //funkcja w functions.js
@@ -108,7 +116,7 @@ const templates = {
       const thisBookList = this;
 
       // referencję do listy wszystkich elementów .book__image w liście .booksList. (2)
-      const allElems = document.querySelectorAll(select.containerOf.image);
+      const allElems = document.querySelector(select.listOf.booklist);
 
       // przejdź po każdym elemencie z tej listy. (2)
       //for(let elem of allElems){
@@ -117,7 +125,7 @@ const templates = {
       /* elem.addEventListener('dbclick', function(event){ */
 
       // Nasłuchiwacz na całą listę zamiast na każdy plik osobno (4)
-      allElems.addEventListener('dbclick', function(event){
+      allElems.addEventListener('dblclick', function(event){
 
         // ...zatrzyma domyślne zachowanie przeglądarki (2)
         event.preventDefault();
@@ -134,7 +142,8 @@ const templates = {
       } */
 
         // Sprawdź czy offsetParent dla image posiada klasę .book_image
-        if(event.target.offsetParent.classlist.contains('book_image')){
+        if(event.target.offsetParent.classList.contains('book__image')){ 
+          // po nasłuchiwaniu sprawdza czy kliknięto konkretnie na okładkę
 
           // Znajdź kliknięty element
           const clickedElement = event.target.offsetParent;
@@ -147,7 +156,7 @@ const templates = {
           if(!thisBookList.favouriteBooks.includes(bookId)){
 
             // dodaj mi klasę "favorite" (4)
-            clickedElement.classlist.add('favorite');
+            clickedElement.classList.add('favorite');
 
             // umieść w katologu "favorite books" (4)
             thisBookList.favouriteBooks.push(bookId);
@@ -156,11 +165,14 @@ const templates = {
           } else {
 
             // zabierz mu klasę "favorite" (4)
-            clickedElement.classlist.remove('favorite');
+            clickedElement.classList.remove('favorite');
+
+            const index = thisBookList.favouriteBooks.indexOf(bookId); 
 
             // i usuń z katalogu ulubionych książek (4)
-            thisBookList.favouriteBooks.splice(bookId);
+            thisBookList.favouriteBooks.splice(index, 1);
           }
+          console.log(thisBookList.favouriteBooks);
         }
       
       });
@@ -175,13 +187,20 @@ const templates = {
         if(event.target.tagName == 'INPUT' && event.target.type == 'checkbox' && event.target.name == 'filter'){
 
           // a jeśli tak, to dodaj jego value do filters (5)
-          if (event.target.checked == 'true') {
-            thisBookList.filtersContainer.push(event.target.value);
+          if (event.target.checked == true) {
+            thisBookList.filters.push(event.target.value);
 
             // jeśli nie to  
           } else {
-            thisBookList.filtersContainer.splice(event.target.value);
+            const index = thisBookList.filters.indexOf(event.target.value);
+            // próbujemy dojść do indexu klikniętego filtru w tablicy 'filters'
+
+            thisBookList.filters.splice(index, 1);
+            //'splice' przyjmuje 2 argumenty. 1. W którym miejscu chce rezpocząć usuwanie, 2. ile elementów chce usunąć
           }
+          console.log(thisBookList.filters);
+
+          thisBookList.filteredBooks();
         }
       });
     }
@@ -194,14 +213,6 @@ const templates = {
       //iteracja po wszystkich elementach datasource.books
       for(let book of thisBookList.data){
 
-        // stała równa temu co zwróci determineRatingBgc dla rating danej książki
-        const ratingBgc = thisBookList.determineRatingBgc(book.rating);
-        book.ratingBgc = ratingBgc;
-
-        // stała która ustala długość paska
-        const ratingWidth = book.ratingBgc*10;
-        book.ratingWidth = ratingWidth;
-
         // zmienna shouldbehidden, która domyślnie ma być "false"
         let shouldBeHidden = false;
 
@@ -212,23 +223,26 @@ const templates = {
           if(!book.details[filter]){
 
             // zmienna "shouldBeHidden" = true
-            shouldBeHidden = 'true';
+            shouldBeHidden = true;     // przypisuję wartość
 
             // przerwanie szukania zgodności z innymi filtrami
             break;
           }
         }
+        const bookElem = document.querySelector('.book__image[data-id="'+book.id+'"]');
+        // tworze nowa stałą, której przypisujemy element html o klasie book_image i atrybucie data-id zgodnym z id książki, którą teraz obsługujemy   (book.id  jest odniesieniem do JSa)
+
         // Jeśli dla elementu "shouldBeHidden"= true
-        if(shouldBeHidden = 'true'){
+        if(shouldBeHidden == true){     // sprawdzam wartość
 
           // dodaj klasę "hidden", która wyszarzy okładkę
-          thisBookList.imageListContainer.classlist.add('hidden');
+          bookElem.classList.add('hidden');
 
         // jeśli false
         } else {
 
           // zabierz klasę "hidden"
-          thisBookList.imageListContainer.classlist.remove('hidden');
+          bookElem.classList.remove('hidden');
         }
       }
     }
@@ -249,7 +263,6 @@ const templates = {
   }
 
   /* CO TO JEST I DLACZEGO? */  
-  const app = new Booklist();
-  app();
+  new Booklist();
 
 }
